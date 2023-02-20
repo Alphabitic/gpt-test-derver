@@ -1,15 +1,18 @@
-import express from 'express'
-import cors from 'cors'
-import bodyParser from 'body-parser'
-import env from 'dotenv'
-import {Configuration, OpenAIApi} from 'openai'
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import { Configuration, OpenAIApi } from 'openai';
+import postRoutes from './routes/posts.js';
+import userRouter from './routes/user.js';
+import dotenv from 'dotenv';
 
 const app = express()
 
 env.config()
 
 app.use(cors())
-app.use(bodyParser.json())
+app.use(express.json({ limit: '30mb', extended: true }));
+app.use(express.urlencoded({ limit: '30mb', extended: true }));
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "https://gpt-tes.vercel.app/");
@@ -30,13 +33,13 @@ app.listen("3080", ()=>console.log("listening on port 3080"))
 
 
 // dummy route to test
-app.get("/", (req, res) => {
+app.get("/chatbot", (req, res) => {
     res.send("Hello World!")
 })
 
 
 //post route for making requests
-app.post('/', async (req, res)=>{
+app.post('/chatbot', async (req, res)=>{
     const {message} = req.body
 
     try{
@@ -56,3 +59,27 @@ app.post('/', async (req, res)=>{
         res.send(e).status(400)
     }
 })
+app.use('/posts', postRoutes);
+app.use('/user', userRouter);
+
+app.get('/', (req, res) => {
+  res.send('APP is RUN');
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
+const connectionString = process.env.MONGODB_CONNECTION_STRING;
+
+mongoose
+  .connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    app.listen(port, () =>
+      console.log(`Server Running on Port: http://localhost:${port}`)
+    );
+  })
+  .catch((error) => console.log(`${error} did not connect`));
+
+mongoose.set('useFindAndModify', false);
