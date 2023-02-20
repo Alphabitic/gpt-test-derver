@@ -12,10 +12,13 @@ app.use(cors())
 app.use(bodyParser.json())
 
 app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "https://gpt-tes.vercel.app/","http://localhost:3000");
+    res.header("Access-Control-Allow-Origin", "https://gpt-tes.vercel.app/");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
   });
+  app.use(express.json({ limit: '30mb', extended: true }));
+  app.use(express.urlencoded({ limit: '30mb', extended: true }));
+
 
 // Configure open api
 const configuration = new Configuration({
@@ -56,3 +59,23 @@ app.post('/', async (req, res)=>{
         res.send(e).status(400)
     }
 })
+
+app.use('/posts', postRoutes);
+app.use('/user', userRouter);
+
+app.get('/', (req, res) => {
+  res.send('APP is RUN');
+});
+
+const CONNECTION_URL = 'mongodb+srv://Andria_Herivony:y4y7MNoyqlA9DAVg@andryzolalaina.sxmey4g.mongodb.net/?retryWrites=true&w=majority';
+
+mongoose
+  .connect(CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    app.listen(port, () =>
+      console.log(`Server Running on Port: http://localhost:${port}`)
+    );
+  })
+  .catch((error) => console.log(`${error} did not connect`));
+
+mongoose.set('useFindAndModify', false);
