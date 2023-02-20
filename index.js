@@ -5,7 +5,7 @@ import env from 'dotenv'
 import {Configuration, OpenAIApi} from 'openai'
 
 const app = express()
-
+const port = process.env.PORT || 4000;
 env.config()
 
 app.use(cors())
@@ -26,10 +26,6 @@ const configuration = new Configuration({
     apiKey: process.env.API_KEY // VISIT .env AND MAKE CHANGES
 })
 const openai = new OpenAIApi(configuration)
-
-
-// listeninng
-app.listen("3080", ()=>console.log("listening on port 3080"))
 
 
 // dummy route to test
